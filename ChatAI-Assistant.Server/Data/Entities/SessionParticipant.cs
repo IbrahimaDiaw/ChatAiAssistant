@@ -1,25 +1,43 @@
-﻿namespace ChatAI_Assistant.Server.Data.Entities
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ChatAI_Assistant.Server.Data.Entities;
+
+[Table("SessionParticipants")]
+public class SessionParticipant
 {
-    public class SessionParticipant
-    {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid SessionId { get; set; }
-        public Guid UserId { get; set; }
-        public string Username { get; set; } = string.Empty;
-        public string? DisplayName { get; set; }
-        public string? Avatar { get; set; }
-        public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? LeftAt { get; set; }
-        public bool IsActive { get; set; } = true;
-        public bool IsAdmin { get; set; } = false;
-        public bool CanSendMessages { get; set; } = true;
-        public DateTime LastSeen { get; set; } = DateTime.UtcNow;
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
 
-        // Navigation Properties
-        public ChatSession Session { get; set; } = null!;
+    [Required]
+    public Guid SessionId { get; set; }
 
-        // Computed Properties
-        public TimeSpan SessionDuration => (LeftAt ?? DateTime.UtcNow) - JoinedAt;
-        public bool IsOnline => IsActive && (DateTime.UtcNow - LastSeen).TotalMinutes < 5;
-    }
+    [Required]
+    public Guid UserId { get; set; }
+
+    [Column(TypeName = "datetime2")]
+    public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+
+    [Column(TypeName = "datetime2")]
+    public DateTime? LeftAt { get; set; }
+
+    [Column(TypeName = "datetime2")]
+    public DateTime LastSeenAt { get; set; } = DateTime.UtcNow;
+
+    public bool IsActive { get; set; } = true;
+    public bool IsModerator { get; set; } = false;
+
+    // Rôle dans la session
+    [StringLength(20)]
+    public string Role { get; set; } = "participant"; // participant, moderator, admin
+
+    // Statistiques du participant
+    public int MessagesCount { get; set; } = 0;
+
+    // Navigation properties
+    [ForeignKey(nameof(SessionId))]
+    public ChatSession Session { get; set; } = null!;
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; } = null!;
 }

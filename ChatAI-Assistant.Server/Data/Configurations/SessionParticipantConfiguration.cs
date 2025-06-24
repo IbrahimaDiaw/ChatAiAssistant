@@ -2,71 +2,68 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace ChatAI_Assistant.Server.Data.Configurations
+namespace ChatAI_Assistant.Server.Data.Configurations;
+
+public class SessionParticipantConfiguration : IEntityTypeConfiguration<SessionParticipant>
 {
-    public class SessionParticipantConfiguration : IEntityTypeConfiguration<SessionParticipant>
+    public void Configure(EntityTypeBuilder<SessionParticipant> builder)
     {
-        public void Configure(EntityTypeBuilder<SessionParticipant> builder)
-        {
-            builder.ToTable("SessionParticipants");
-            builder.HasKey(e => e.Id);
+        builder.ToTable("SessionParticipants");
 
-            // Properties
-            builder.Property(e => e.Id)
-                .IsRequired();
+        // Primary Key
+        builder.HasKey(p => p.Id);
 
-            builder.Property(e => e.SessionId)
-                .IsRequired();
+        // Properties
+        builder.Property(p => p.Id)
+            .IsRequired()
+            .ValueGeneratedOnAdd();
 
-            builder.Property(e => e.UserId)
-                .HasMaxLength(100)
-                .IsRequired();
+        builder.Property(p => p.SessionId)
+            .IsRequired();
 
-            builder.Property(e => e.Username)
-                .HasMaxLength(50)
-                .IsRequired();
+        builder.Property(p => p.UserId)
+            .IsRequired();
 
-            builder.Property(e => e.DisplayName)
-                .HasMaxLength(100);
+        builder.Property(p => p.JoinedAt)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.Property(e => e.Avatar)
-                .HasMaxLength(500);
+        builder.Property(p => p.LeftAt)
+            .HasColumnType("datetime2");
 
-            builder.Property(e => e.JoinedAt)
-                .HasColumnType("datetime2")
-                .HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(p => p.LastSeenAt)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.Property(e => e.LeftAt)
-                .HasColumnType("datetime2");
+        builder.Property(p => p.IsActive)
+            .HasDefaultValue(true);
 
-            builder.Property(e => e.LastSeen)
-                .HasColumnType("datetime2")
-                .HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(p => p.IsModerator)
+            .HasDefaultValue(false);
 
-            // Indexes
-            builder.HasIndex(e => e.SessionId)
-                .HasDatabaseName("IX_Participants_SessionId");
+        builder.Property(p => p.Role)
+            .HasMaxLength(20)
+            .HasDefaultValue("participant");
 
-            builder.HasIndex(e => e.UserId)
-                .HasDatabaseName("IX_Participants_UserId");
+        builder.Property(p => p.MessagesCount)
+            .HasDefaultValue(0);
 
-            builder.HasIndex(e => new { e.SessionId, e.UserId })
-                .IsUnique()
-                .HasDatabaseName("IX_Participants_Session_User");
+        // Indexes
+        builder.HasIndex(p => new { p.SessionId, p.UserId })
+            .IsUnique()
+            .HasDatabaseName("IX_SessionParticipants_Session_User");
 
-            builder.HasIndex(e => e.IsActive)
-                .HasDatabaseName("IX_Participants_IsActive");
+        builder.HasIndex(p => new { p.SessionId, p.IsActive })
+            .HasDatabaseName("IX_SessionParticipants_Session_Active");
 
-            // Relationships
-            builder.HasOne(e => e.Session)
-                .WithMany(s => s.Participants)
-                .HasForeignKey(e => e.SessionId)
-                .OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(p => new { p.UserId, p.IsActive })
+            .HasDatabaseName("IX_SessionParticipants_User_Active");
 
-            // Computed columns (not mapped)
-            builder.Ignore(e => e.SessionDuration);
-            builder.Ignore(e => e.IsOnline);
+        builder.HasIndex(p => p.LastSeenAt)
+            .HasDatabaseName("IX_SessionParticipants_LastSeenAt");
 
-        }
+        // Constraints
+        builder.ToTable(t => t.HasCheckConstraint("CK_SessionParticipants_Role",
+            "[Role] IN ('participant', 'moderator', 'admin')"));
     }
 }

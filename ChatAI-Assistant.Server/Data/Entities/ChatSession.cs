@@ -1,27 +1,53 @@
-﻿using ChatAI_Assistant.Server.Commons;
+﻿using ChatAI_Assistant.Server.Data.Entities;
+using ChatAI_Assistant.Shared.Enums;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ChatAI_Assistant.Server.Data.Entities
+namespace ChatAI_Assistant.Server.Data.Entities;
+
+[Table("ChatSessions")]
+public class ChatSession
 {
-    public class ChatSession : BaseEntity
-    {
-        public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
-        public DateTime LastActivity { get; set; } = DateTime.UtcNow;
-        public bool IsActive { get; set; } = true;
-        public int MaxParticipants { get; set; } = 10;
-        public string CreatedBy { get; set; } = string.Empty;
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
 
-        // Computed Properties (not mapped to DB)
-        public int ActiveParticipantCount => Participants.Count(p => p.IsActive);
-        public int TotalMessageCount => Messages.Count(m => !m.IsDeleted);
-        public DateTime? LastMessageAt => Messages
-            .Where(m => !m.IsDeleted)
-            .OrderByDescending(m => m.Timestamp)
-            .FirstOrDefault()?.Timestamp;
+    [Required]
+    [StringLength(200)]
+    public string Title { get; set; } = string.Empty;
 
-        // Navigation Properties
-        public ICollection<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
-        public ICollection<SessionParticipant> Participants { get; set; } = new List<SessionParticipant>();
-        public ICollection<SessionSettings> Settings { get; set; } = new List<SessionSettings>();
-    }
+    [StringLength(500)]
+    public string? Description { get; set; }
+
+    // Créateur de la session
+    [Required]
+    public Guid CreatedByUserId { get; set; }
+
+    [Column(TypeName = "datetime2")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [Column(TypeName = "datetime2")]
+    public DateTime LastActivity { get; set; } = DateTime.UtcNow;
+
+    public bool IsActive { get; set; } = true;
+    public bool IsPrivate { get; set; } = false;
+
+    // Métadonnées de session
+    public int MessageCount { get; set; } = 0;
+    public int ParticipantCount { get; set; } = 0;
+
+    // Configuration AI pour cette session
+    public AIProvider? SessionAIProvider { get; set; }
+
+    [StringLength(50)]
+    public string? SessionAIModel { get; set; }
+
+    [Column(TypeName = "nvarchar(max)")]
+    public string? SessionContext { get; set; } // Context spécifique à la session
+
+    // Navigation properties
+    [ForeignKey(nameof(CreatedByUserId))]
+    public User CreatedBy { get; set; } = null!;
+
+    public ICollection<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
+    public ICollection<SessionParticipant> Participants { get; set; } = new List<SessionParticipant>();
 }

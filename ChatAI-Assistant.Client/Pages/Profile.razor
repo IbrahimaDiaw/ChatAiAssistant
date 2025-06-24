@@ -1,0 +1,23 @@
+﻿@page "/profile"
+@using ChatAI_Assistant.Client.Components
+@using Radzen
+@using Radzen.Blazor
+
+<PageTitle>Profile - ChatAI Assistant</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <!-- Page Header -->
+    <RadzenCard Class="rz-shadow-1">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" 
+                   JustifyContent="JustifyContent.SpaceBetween" Class="rz-p-3">
+            <RadzenText TextStyle="TextStyle.H5" Class="rz-mb-0">User Profile</RadzenText>
+            <RadzenBreadCrumb>
+                <RadzenBreadCrumbItem Path="/" Text="Home" />
+                <RadzenBreadCrumbItem Text="Profile" />
+            </RadzenBreadCrumb>
+        </RadzenStack>
+    </RadzenCard>
+
+    <!-- Profile Component -->
+    <UserProfileComponent />
+</RadzenStack>

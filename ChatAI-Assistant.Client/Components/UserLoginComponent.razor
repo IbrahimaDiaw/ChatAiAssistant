@@ -1,0 +1,40 @@
+﻿@using ChatAI_Assistant.Client.Services
+@using Radzen
+@using Radzen.Blazor
+@using ChatAI_Assistant.Shared.DTOs.Requests
+@using ChatAI_Assistant.Shared.Enums
+@inject IChatClientService ChatClientService
+@inject IStateService StateService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<EditForm Model="@model" OnValidSubmit="@OnSubmit">
+    <DataAnnotationsValidator />
+    <RadzenStack Gap="1rem">
+        <RadzenText TextStyle="TextStyle.H6">Quick Login & Chat</RadzenText>
+
+        <RadzenFormField Text="Username" Variant="Variant.Outlined">
+            <RadzenTextBox @bind-Value="@model.Username" Name="Username" MaxLength="50"
+                           Placeholder="Enter your username..." />
+            <ValidationMessage For="@(() => model.Username)" />
+        </RadzenFormField>
+
+        <RadzenFormField Text="AI Provider" Variant="Variant.Outlined">
+            <RadzenDropDown @bind-Value="@model.PreferredAIProvider" Data="@aiProviders"
+                            TextProperty="Text" ValueProperty="Value" Name="AIProvider" />
+        </RadzenFormField>
+
+        <RadzenFormField Text="Initial Message (Optional)" Variant="Variant.Outlined">
+            <RadzenTextArea @bind-Value="@model.InitialMessage" Name="InitialMessage"
+                            Rows="3" MaxLength="1000" Placeholder="Type your first message..." />
+        </RadzenFormField>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel"
+                          Click="@(() => DialogService.Close(false))" />
+            <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary"
+                          Text="Start Chat" IsBusy="@isLoading" />
+        </RadzenStack>
+    </RadzenStack>
+</EditForm>
+

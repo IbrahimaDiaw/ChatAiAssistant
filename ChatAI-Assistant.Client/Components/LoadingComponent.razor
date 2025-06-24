@@ -1,0 +1,30 @@
+﻿@using Radzen
+@using Radzen.Blazor
+
+<div class="loading-overlay @(IsVisible ? "visible" : "")">
+    <div class="loading-content">
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary"
+                                   Size="ProgressBarCircularSize.Large"
+                                   ShowValue="false"
+                                   Mode="ProgressBarMode.Indeterminate" />
+
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <RadzenText TextStyle="TextStyle.Body1" Class="rz-mt-3 rz-text-align-center">
+                @Message
+            </RadzenText>
+        }
+
+        @if (!string.IsNullOrEmpty(SubMessage))
+        {
+            <RadzenText TextStyle="TextStyle.Caption" Class="rz-mt-1 rz-text-align-center rz-text-secondary-color">
+                @SubMessage
+            </RadzenText>
+        }
+    </div>
+</div>
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public string? SubMessage { get; set; }
+}

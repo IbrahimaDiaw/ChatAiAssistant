@@ -1,0 +1,97 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@using ChatAI_Assistant.Shared.DTOs
+@using ChatAI_Assistant.Shared.Enums
+@inject ContextMenuService ContextMenuService
+@inject IJSRuntime JSRuntime;
+
+<div class="message-container @GetMessageAlignment()">
+    <RadzenCard Class="@GetMessageCardStyle()" Style="@GetMessageStyle()">
+        <RadzenStack Gap="0.5rem">
+            <!-- Message Header -->
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenIcon Icon="@GetSenderIcon()" Style="@GetIconStyle()" />
+                    <RadzenText TextStyle="TextStyle.Caption" Class="rz-mb-0">
+                        @GetSenderName()
+                    </RadzenText>
+                    @if (Message.AIProvider.HasValue)
+                    {
+                        <RadzenBadge BadgeStyle="@GetProviderBadgeStyle()" Text="@Message.AIProvider.Value.ToString()"
+                                     Size="BadgeSize.ExtraSmall" />
+                    }
+                </RadzenStack>
+
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                    <RadzenText TextStyle="TextStyle.Caption" Class="rz-mb-0 rz-text-secondary-color">
+                        @Message.Timestamp.ToString("HH:mm")
+                        @if (Message.IsEdited)
+                        {
+                            <span class="rz-text-info-color">(edited)</span>
+                        }
+                    </RadzenText>
+                    @if (CanDelete())
+                    {
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" Size="ButtonSize.ExtraSmall"
+                                      Icon="more_vert" Click="@((args) => ShowContextMenu(args))" />
+                    }
+                </RadzenStack>
+            </RadzenStack>
+
+            <!-- Message Content -->
+            <div class="message-content">
+                @if (!Message.IsDeleted)
+                {
+                    
+                    <RadzenText TextStyle="TextStyle.Body1" Class="rz-mb-0" Style="white-space: pre-wrap; word-break: break-word;">
+                        @Message.Content
+                    </RadzenText>
+                    
+                }
+                else
+                {
+                    <RadzenText TextStyle="TextStyle.Body2" Class="rz-mb-0 rz-text-secondary-color" Style="font-style: italic;">
+                        This message has been deleted
+                    </RadzenText>
+                }
+            </div>
+
+            <!-- AI Model Info -->
+            @if (Message.IsFromAI && !string.IsNullOrEmpty(Message.AIModel))
+            {
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Class="rz-mt-1">
+                    <RadzenText TextStyle="TextStyle.Caption" Class="rz-text-secondary-color">
+                        Model: @Message.AIModel
+                    </RadzenText>
+                    @if (Message.TokensUsed.HasValue)
+                    {
+                        <RadzenText TextStyle="TextStyle.Caption" Class="rz-text-secondary-color">
+                            • Tokens: @Message.TokensUsed.Value
+                        </RadzenText>
+                    }
+                </RadzenStack>
+            }
+        </RadzenStack>
+    </RadzenCard>
+</div>
+
+<style>
+    .message-container {
+        display: flex;
+        margin-bottom: 0.5rem;
+    }
+
+    .message-user {
+        justify-content: flex-end;
+    }
+
+    .message-assistant {
+        justify-content: flex-start;
+    }
+
+    .message-content {
+        max-width: 100%;
+        overflow-wrap: break-word;
+    }
+</style>

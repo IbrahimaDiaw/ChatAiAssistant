@@ -1,16 +1,100 @@
-﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+﻿@using ChatAI_Assistant.Client.Components
+@using ChatAI_Assistant.Client.Services
+@using Radzen
+@using Radzen.Blazor
+@inherits LayoutComponentBase
+@inject IStateService StateService
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject TooltipService TooltipService
+@inject ContextMenuService ContextMenuService
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+<RadzenLayout Style="grid-template-areas: 'rz-header' 'rz-body'; grid-template-rows: auto 1fr;">
+    <RadzenHeader>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Class="rz-p-4">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="smart_toy" Style="font-size: 2rem; color: var(--rz-primary);" />
+                <RadzenText TextStyle="TextStyle.H5" Class="rz-mb-0">ChatAI Assistant</RadzenText>
+            </RadzenStack>
 
-        <article class="content px-4">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Class="rz-ml-auto">
+                @if (StateService.HasActiveSession)
+                {
+                    <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="@($"Session: {StateService.CurrentSession?.Title}")" />
+                }
+
+                @if (StateService.IsLoggedIn)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenIcon Icon="account_circle" />
+                        <RadzenText>@StateService.CurrentUser?.Username</RadzenText>
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
+                                      Icon="logout" Text="Logout" Click="@OnLogout" />
+                    </RadzenStack>
+                }
+                else
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                  Icon="login" Text="Login" Click="@OnLogin" />
+                }
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+
+    <RadzenBody>
+        <div class="rz-p-4" style="height: 100%; overflow: auto;">
             @Body
-        </article>
-    </main>
-</div>
+        </div>
+    </RadzenBody>
+</RadzenLayout>
+
+<RadzenNotification />
+<RadzenDialog />
+<RadzenTooltip />
+<RadzenContextMenu />
+
+@code {
+    protected override void OnInitialized()
+    {
+        StateService.OnStateChanged += StateHasChanged;
+    }
+
+    private async Task OnLogin()
+    {
+        var result = await DialogService.OpenAsync<UserLoginComponent>("Login",
+            new Dictionary<string, object>(),
+            new DialogOptions
+            {
+                Width = "400px",
+                Height = "370px",
+                Resizable = true,
+                Draggable = true
+            });
+
+        if (result != null)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Welcome!",
+                Detail = $"Logged in as {StateService.CurrentUser?.Username}"
+            });
+        }
+    }
+
+    private void OnLogout()
+    {
+        StateService.ClearAll();
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Info,
+            Summary = "Goodbye!",
+            Detail = "You have been logged out"
+        });
+    }
+
+    public void Dispose()
+    {
+        StateService.OnStateChanged -= StateHasChanged;
+    }
+}

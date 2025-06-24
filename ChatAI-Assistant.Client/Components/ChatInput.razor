@@ -1,0 +1,52 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@inject IJSRuntime JSRuntime
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.5rem">
+    <div style="flex: 1;">
+        <RadzenTextArea @bind-Value="@messageText"
+                        @onkeydown="@HandleKeyDown"
+                        @ref="textAreaRef"
+                        Placeholder="Type your message... (Shift+Enter for new line, Enter to send)"
+                        Rows="1"
+                        MaxLength="2000"
+                        Style="min-height: 40px; max-height: 120px; width:100%"
+                        Disabled="@IsDisabled" />
+    </div>
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+        <!-- Attach File Button -->
+        <RadzenButton ButtonStyle="ButtonStyle.Light"
+                      Size="ButtonSize.Medium"
+                      Icon="attach_file"
+                      Disabled="@IsDisabled"
+                      Click="@AttachFile"
+                      Tooltip="Attach file" />
+
+        <!-- Send Button -->
+        <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                      Size="ButtonSize.Medium"
+                      Icon="send"
+                      Disabled="@(IsDisabled || string.IsNullOrWhiteSpace(messageText))"
+                      Click="@SendMessage"
+                      Tooltip="Send message" />
+    </RadzenStack>
+</RadzenStack>
+
+<!-- Character counter -->
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
+             AlignItems="AlignItems.Center" Class="rz-mt-1">
+    <div>
+        @if (showTypingIndicator)
+        {
+            <RadzenText TextStyle="TextStyle.Caption" Class="rz-text-secondary-color">
+                <RadzenIcon Icon="more_horiz" Style="font-size: 0.875rem;" /> Typing...
+            </RadzenText>
+        }
+    </div>
+
+    <RadzenText TextStyle="TextStyle.Caption" Class="@GetCharacterCountStyle()">
+        @messageText.Length / 2000
+    </RadzenText>
+</RadzenStack>
+

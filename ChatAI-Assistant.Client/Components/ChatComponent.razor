@@ -1,0 +1,96 @@
+﻿@using ChatAI_Assistant.Client.Services
+@using Radzen
+@using Radzen.Blazor
+@using ChatAI_Assistant.Shared.DTOs.Requests
+@using ChatAI_Assistant.Shared.DTOs
+@using ChatAI_Assistant.Shared.Enums
+@inject IChatClientService ChatApiService
+@inject IStateService StateService
+@inject NotificationService NotificationService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<RadzenCard Class="rz-shadow-3" Style="height: calc(100vh - 140px); display: flex; flex-direction: column;">
+    @if (!StateService.IsLoggedIn)
+    {
+        <div class="rz-text-align-center rz-p-8">
+            <RadzenIcon Icon="chat_bubble_outline" Style="font-size: 4rem; color: var(--rz-text-disabled-color);" />
+            <RadzenText TextStyle="TextStyle.H5" Class="rz-mt-4 rz-mb-2">Welcome to ChatAI Assistant</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-secondary-color">
+                Please login to start chatting with AI assistants
+            </RadzenText>
+        </div>
+    }
+    else if (!StateService.HasActiveSession)
+    {
+        <div class="rz-text-align-center rz-p-8">
+            <RadzenIcon Icon="add_comment" Style="font-size: 4rem; color: var(--rz-text-disabled-color);" />
+            <RadzenText TextStyle="TextStyle.H5" Class="rz-mt-4 rz-mb-2">No Active Session</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-secondary-color">
+                Start a new conversation to begin chatting
+            </RadzenText>
+        </div>
+    }
+    else
+    {
+        <!-- Chat Header -->
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" 
+                   JustifyContent="JustifyContent.SpaceBetween" Class="rz-p-3 rz-border-bottom">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="forum" />
+                <RadzenText TextStyle="TextStyle.Subtitle1" Class="rz-mb-0">
+                    @StateService.CurrentSession?.Title
+                </RadzenText>
+            </RadzenStack>
+            
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <AIProviderSelector />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" 
+                            Icon="refresh" Tooltip="Refresh Messages" Click="@RefreshMessages" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" 
+                            Icon="clear" Tooltip="Clear Chat" Click="@ClearChat" />
+            </RadzenStack>
+        </RadzenStack>
+
+        <!-- Messages Area -->
+        <div style="flex: 1; overflow-y: auto; padding: 1rem;" @ref="messagesContainer">
+            @if (StateService.IsLoading)
+            {
+                <div class="rz-text-align-center rz-p-4">
+                    <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" 
+                                             Size="ProgressBarCircularSize.Medium" 
+                                             ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                    <RadzenText TextStyle="TextStyle.Caption" Class="rz-mt-2">Loading messages...</RadzenText>
+                </div>
+            }
+            else if (!StateService.Messages.Any())
+            {
+                <div class="rz-text-align-center rz-p-4">
+                    <RadzenIcon Icon="chat" Style="font-size: 2rem; color: var(--rz-text-disabled-color);" />
+                    <RadzenText TextStyle="TextStyle.Body1" Class="rz-mt-2 rz-text-secondary-color">
+                        No messages yet. Start the conversation!
+                    </RadzenText>
+                </div>
+            }
+            else
+            {
+                <MessageList Messages="@StateService.Messages" OnDeleteMessage="@DeleteMessage" />
+            }
+        </div>
+
+        <!-- Input Area -->
+        <div class="rz-border-top rz-p-3">
+            <ChatInput OnSendMessage="@SendMessage" IsDisabled="@StateService.IsSendingMessage" />
+            
+            @if (StateService.IsSendingMessage)
+            {
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" 
+                           Gap="0.5rem" Class="rz-mt-2">
+                    <RadzenProgressBarCircular Size="ProgressBarCircularSize.Small" 
+                                             ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                    <RadzenText TextStyle="TextStyle.Caption">AI is thinking...</RadzenText>
+                </RadzenStack>
+            }
+        </div>
+    }
+</RadzenCard>

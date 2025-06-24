@@ -52,8 +52,6 @@ public class AIResponseDto
             Timestamp = GeneratedAt,
             Type = MessageType.AI,
             IsFromAI = true,
-            ConversationContext = ConversationId?.ToString(),
-            CreatedAt = GeneratedAt
         };
     }
 }

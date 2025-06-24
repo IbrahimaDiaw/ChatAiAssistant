@@ -10,36 +10,21 @@ namespace ChatAI_Assistant.Shared.DTOs
 {
     public class ChatMessageDto
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-
-        [Required]
+        public Guid Id { get; set; }
         public Guid SessionId { get; set; }
-
-        [Required]
         public Guid UserId { get; set; }
-
-        [Required]
-        [StringLength(4000, ErrorMessage = "Message cannot exceed 4000 characters")]
         public string Content { get; set; } = string.Empty;
-
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
-        public MessageType Type { get; set; } = MessageType.User;
-
-        public bool IsFromAI { get; set; } = false;
-
-        public string? ConversationContext { get; set; }
-
+        public DateTime Timestamp { get; set; }
+        public MessageType Type { get; set; }
+        public bool IsFromAI { get; set; }
         public Guid? ParentMessageId { get; set; }
-
-        // Audit fields from BaseEntity
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
-        public bool IsDeleted { get; set; } = false;
-
-        // Additional display properties
-        public string? Username { get; set; }
-        public string? UserAvatar { get; set; }
-        public List<ChatMessageDto> Replies { get; set; } = new();
+        public AIProvider? AIProvider { get; set; }
+        public string? AIModel { get; set; }
+        public int? TokensUsed { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string? UserDisplayName { get; set; }
+        public bool IsEdited { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? EditedAt { get; set; }
     }
 }

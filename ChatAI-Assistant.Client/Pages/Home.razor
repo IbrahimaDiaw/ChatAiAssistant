@@ -1,7 +1,109 @@
 ﻿@page "/"
+@using ChatAI_Assistant.Client.Components
+@using Radzen
+@using Radzen.Blazor
 
-<PageTitle>Home</PageTitle>
+<PageTitle>ChatAI Assistant</PageTitle>
 
-<h1>Hello, world!</h1>
+<RadzenStack Gap="2rem">
+    <!-- Hero Section -->
+    <RadzenCard Class="rz-shadow-3 rz-background-color-primary-lighter">
+        <RadzenStack Gap="1rem" Class="rz-text-align-center rz-p-4">
+            <RadzenIcon Icon="smart_toy" Style="font-size: 4rem; color: var(--rz-primary);" />
+            <RadzenText TextStyle="TextStyle.H3" Class="rz-mb-0">
+                Welcome to ChatAI Assistant
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" Class="rz-text-secondary-color rz-mb-0">
+                Your intelligent AI companion for conversations, assistance, and more
+            </RadzenText>
+        </RadzenStack>
+    </RadzenCard>
 
-Welcome to your new app.
+    <!-- Features Grid -->
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenCard Class="rz-shadow-2" Style="height: 100%;">
+                <RadzenStack Gap="1rem" Class="rz-text-align-center rz-p-3">
+                    <RadzenIcon Icon="psychology" Style="font-size: 2.5rem; color: var(--rz-success);" />
+                    <RadzenText TextStyle="TextStyle.H6" Class="rz-mb-0">
+                        Multiple AI Providers
+                    </RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body2" Class="rz-text-secondary-color">
+                        Choose from OpenAI, Claude, and Gemini to get the best responses for your needs
+                    </RadzenText>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+        
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenCard Class="rz-shadow-2" Style="height: 100%;">
+                <RadzenStack Gap="1rem" Class="rz-text-align-center rz-p-3">
+                    <RadzenIcon Icon="chat_bubble" Style="font-size: 2.5rem; color: var(--rz-info);" />
+                    <RadzenText TextStyle="TextStyle.H6" Class="rz-mb-0">
+                        Real-time Chat
+                    </RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body2" Class="rz-text-secondary-color">
+                        Engage in fluid conversations with instant responses and seamless message flow
+                    </RadzenText>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+        
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenCard Class="rz-shadow-2" Style="height: 100%;">
+                <RadzenStack Gap="1rem" Class="rz-text-align-center rz-p-3">
+                    <RadzenIcon Icon="security" Style="font-size: 2.5rem; color: var(--rz-warning);" />
+                    <RadzenText TextStyle="TextStyle.H6" Class="rz-mb-0">
+                        Secure & Private
+                    </RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body2" Class="rz-text-secondary-color">
+                        Your conversations are protected with enterprise-grade security and privacy
+                    </RadzenText>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <!-- Quick Start Section -->
+    <RadzenCard Class="rz-shadow-2">
+        <RadzenStack Gap="1.5rem" Class="rz-p-4">
+            <RadzenText TextStyle="TextStyle.H5" Class="rz-mb-0 rz-text-align-center">
+                Get Started in Seconds
+            </RadzenText>
+            
+            <RadzenRow Gap="2rem" Class="rz-align-items-center">
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenStack Gap="1rem">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Primary" Text="1" />
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-mb-0">
+                                Click the <strong>Login</strong> button in the top-right corner
+                            </RadzenText>
+                        </RadzenStack>
+                        
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Primary" Text="2" />
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-mb-0">
+                                Enter your username and choose your preferred AI provider
+                            </RadzenText>
+                        </RadzenStack>
+                        
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Primary" Text="3" />
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-mb-0">
+                                Start chatting immediately with intelligent AI assistants
+                            </RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenColumn>
+                
+                <RadzenColumn Size="12" SizeMD="4" Class="rz-text-align-center">
+                    <RadzenIcon Icon="rocket_launch" Style="font-size: 6rem; color: var(--rz-primary-lighter);" />
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+    </RadzenCard>
+
+    <!-- Chat Component -->
+    <ChatComponent />
+</RadzenStack>

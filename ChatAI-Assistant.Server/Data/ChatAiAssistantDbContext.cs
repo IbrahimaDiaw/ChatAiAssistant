@@ -1,99 +1,119 @@
 ﻿using ChatAI_Assistant.Server.Data.Configurations;
 using ChatAI_Assistant.Server.Data.Entities;
-using ChatAI_Assistant.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
-namespace ChatAI_Assistant.Server.Data
+namespace ChatAI_Assistant.Server.Data;
+
+public class ChatAiAssistantDbContext : DbContext
 {
-    public class ChatAiAssistantDbContext : DbContext
+    public ChatAiAssistantDbContext(DbContextOptions<ChatAiAssistantDbContext> options) : base(options)
     {
-        public ChatAiAssistantDbContext(DbContextOptions<ChatAiAssistantDbContext> options)
-            : base(options)
+    }
+
+    // DbSets
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<UserPreferences> UserPreferences { get; set; } = null!;
+    public DbSet<ChatSession> Sessions { get; set; } = null!;
+    public DbSet<SessionParticipant> SessionParticipants { get; set; } = null!;
+    public DbSet<ChatMessage> Messages { get; set; } = null!;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Apply all configurations
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new UserPreferencesConfiguration());
+        modelBuilder.ApplyConfiguration(new ChatSessionConfiguration());
+        modelBuilder.ApplyConfiguration(new SessionParticipantConfiguration());
+        modelBuilder.ApplyConfiguration(new ChatMessageConfiguration());
+
+        // Global configurations
+        ConfigureGlobalSettings(modelBuilder);
+        SeedData(modelBuilder);
+    }
+
+    private static void ConfigureGlobalSettings(ModelBuilder modelBuilder)
+    {
+        // Configuration globale pour tous les Guid Id
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-        }
-        public DbSet<ChatMessage> ChatMessages { get; set; }
-        public DbSet<ChatSession> ChatSessions { get; set; }
-        public DbSet<SessionParticipant> SessionParticipants { get; set; }
-        public DbSet<SessionSettings> SessionSettings { get; set; }
-        public DbSet<ConversationContext> ConversationContexts { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-            modelBuilder.ApplyConfiguration(new ChatMessageConfiguration());
-            modelBuilder.ApplyConfiguration(new ChatSessionConfiguration());
-            modelBuilder.ApplyConfiguration(new SessionParticipantConfiguration());
-            modelBuilder.ApplyConfiguration(new SessionSettingsConfiguration());
-            modelBuilder.ApplyConfiguration(new ConversationContextConfiguration());
-
-            SeedData(modelBuilder);
-        }
-
-        public override int SaveChanges()
-        {
-            HandleAuditFields();
-            return base.SaveChanges();
-        }
-
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            HandleAuditFields();
-            return  base.SaveChangesAsync(cancellationToken);
-        }
-
-        private void HandleAuditFields()
-        {
-            var entries = ChangeTracker.Entries()
-                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
-
-            foreach (var entry in entries)
+            var idProperty = entityType.FindProperty("Id");
+            if (idProperty?.ClrType == typeof(Guid))
             {
-                if (entry.State == EntityState.Modified)
-                {
-                    if (entry.Entity.GetType().GetProperty("UpdatedAt") != null)
-                    {
-                        entry.Property("UpdatedAt").CurrentValue = DateTime.UtcNow;
-                    }
-                }
+                idProperty.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAdd;
             }
         }
 
-        private void SeedData(ModelBuilder modelBuilder)
+        // Configuration globale pour les DateTime
+        foreach (var property in modelBuilder.Model.GetEntityTypes()
+            .SelectMany(t => t.GetProperties())
+            .Where(p => p.ClrType == typeof(DateTime) || p.ClrType == typeof(DateTime?)))
         {
-            // Seed default session
-            var defaultSessionId = Guid.NewGuid();
-            var defaultSession = new ChatSession
+            property.SetColumnType("datetime2");
+        }
+    }
+
+    private static void SeedData(ModelBuilder modelBuilder)
+    {
+        // Données de test pour développement
+        var testUserId = Guid.NewGuid();
+        var testSessionId = Guid.NewGuid();
+        var testParticipantId = Guid.NewGuid();
+        var testPreferencesId = Guid.NewGuid();
+
+        modelBuilder.Entity<User>().HasData(
+            new User
             {
-                Id = defaultSessionId,
-                Name = "General Chat",
-                Description = "Default chat session for testing",
-                CreatedBy = "system",
+                Id = testUserId,
+                Username = "testuser",
+                DisplayName = "Test User",
+                CreatedAt = DateTime.UtcNow,
+                LastActivity = DateTime.UtcNow,
+                IsActive = true
+            }
+        );
+
+        modelBuilder.Entity<UserPreferences>().HasData(
+            new UserPreferences
+            {
+                Id = testPreferencesId,
+                UserId = testUserId,
+                PreferredAIProvider = Shared.Enums.AIProvider.OpenAI,
+                Temperature = 0.7,
+                MaxTokens = 1000,
+                Theme = "light",
+                Language = "fr",
+                UpdatedAt = DateTime.UtcNow
+            }
+        );
+
+        modelBuilder.Entity<ChatSession>().HasData(
+            new ChatSession
+            {
+                Id = testSessionId,
+                Title = "Session de Test",
+                Description = "Session de test pour développement",
+                CreatedByUserId = testUserId,
                 CreatedAt = DateTime.UtcNow,
                 LastActivity = DateTime.UtcNow,
                 IsActive = true,
-                MaxParticipants = 10
-            };
+                MessageCount = 0,
+                ParticipantCount = 1
+            }
+        );
 
-            modelBuilder.Entity<ChatSession>().HasData(defaultSession);
-
-            // Seed welcome message
-            var welcomeMessage = new ChatMessage
+        modelBuilder.Entity<SessionParticipant>().HasData(
+            new SessionParticipant
             {
-                Id = Guid.NewGuid(),
-                SessionId = defaultSessionId,
-                UserId = Guid.NewGuid(),
-                Content = "Welcome to the AI Chat! I'm here to help you. How can I assist you today?",
-                Type = MessageType.Welcome,
-                IsFromAI = true,
-                CreatedAt = DateTime.UtcNow,
-                Timestamp = DateTime.UtcNow
-            };
-
-            modelBuilder.Entity<ChatMessage>().HasData(welcomeMessage);
-        }
+                Id = testParticipantId,
+                SessionId = testSessionId,
+                UserId = testUserId,
+                JoinedAt = DateTime.UtcNow,
+                LastSeenAt = DateTime.UtcNow,
+                IsActive = true,
+                Role = "admin"
+            }
+        );
     }
 }

@@ -1,0 +1,86 @@
+﻿@using ChatAI_Assistant.Client.Services
+@using Radzen
+@using Radzen.Blazor
+@using ChatAI_Assistant.Shared.Enums
+@inject IStateService StateService
+
+<RadzenDropDown @bind-Value="@selectedProvider"
+                Data="@aiProviders"
+                TextProperty="Text"
+                ValueProperty="Value"
+                Style="min-width: 120px;"
+                Size="ButtonSize.Small"
+                Change="@OnProviderChanged"
+                Placeholder="Select AI Provider">
+    <Template Context="provider">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenIcon Icon="@GetProviderIcon(provider.Value)" Style="@GetProviderIconStyle(provider.Value)" />
+            <span>@provider.Text</span>
+        </RadzenStack>
+    </Template>
+</RadzenDropDown>
+
+@code {
+    private AIProvider selectedProvider;
+
+    private readonly List<ProviderOption> aiProviders = new()
+    {
+        new ProviderOption { Text = "OpenAI", Value = AIProvider.OpenAI },
+        new ProviderOption { Text = "AzureOpenAI", Value = AIProvider.AzureOpenAI },
+        new ProviderOption { Text = "Claude", Value = AIProvider.Anthropic }
+    };
+
+    protected override void OnInitialized()
+    {
+        selectedProvider = StateService.SelectedAIProvider;
+        StateService.OnStateChanged += OnStateChanged;
+    }
+
+    private void OnStateChanged()
+    {
+        selectedProvider = StateService.SelectedAIProvider;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnProviderChanged(object value)
+    {
+        if (value is AIProvider provider)
+        {
+            StateService.SetAIProvider(provider);
+        }
+    }
+
+    private string GetProviderIcon(AIProvider provider)
+    {
+        return provider switch
+        {
+            AIProvider.OpenAI => "psychology",
+            AIProvider.AzureOpenAI => "auto_awesome",
+            AIProvider.Anthropic => "diamond",
+            _ => "smart_toy"
+        };
+    }
+
+    private string GetProviderIconStyle(AIProvider provider)
+    {
+        var color = provider switch
+        {
+            AIProvider.OpenAI => "#10a37f",
+            AIProvider.AzureOpenAI => "#ff6b35",
+            AIProvider.Anthropic => "#4285f4",
+            _ => "var(--rz-text-color)"
+        };
+        return $"color: {color}; font-size: 1rem;";
+    }
+
+    public void Dispose()
+    {
+        StateService.OnStateChanged -= OnStateChanged;
+    }
+
+    private class ProviderOption
+    {
+        public string Text { get; set; } = string.Empty;
+        public AIProvider Value { get; set; }
+    }
+}

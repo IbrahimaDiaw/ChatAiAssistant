@@ -1,4 +1,6 @@
-﻿namespace ChatAI_Assistant.Shared.DTOs.AI;
+﻿using ChatAI_Assistant.Shared.Enums;
+
+namespace ChatAI_Assistant.Shared.DTOs.AI;
 
 public class AISessionStateDto
 {

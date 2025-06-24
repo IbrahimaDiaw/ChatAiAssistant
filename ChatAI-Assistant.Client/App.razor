@@ -1,4 +1,8 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@using Microsoft.AspNetCore.Components.Routing
+@using Radzen
+@using Radzen.Blazor
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -6,7 +10,23 @@
     <NotFound>
         <PageTitle>Not found</PageTitle>
         <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+            <div class="rz-text-align-center rz-p-8">
+                <RadzenIcon Icon="error_outline" Style="font-size: 4rem; color: var(--rz-danger);" />
+                <RadzenText TextStyle="TextStyle.H4" Class="rz-mt-4 rz-mb-2">
+                    Page Not Found
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-secondary-color rz-mb-4">
+                    Sorry, the page you're looking for doesn't exist.
+                </RadzenText>
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" 
+                            Icon="home" 
+                            Text="Go Home" 
+                            Click="@(() => NavigationManager.NavigateTo("/"))" />
+            </div>
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+}

@@ -1,0 +1,16 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@using ChatAI_Assistant.Shared.DTOs
+@using ChatAI_Assistant.Shared.Enums
+
+<RadzenStack Gap="0.75rem">
+    @foreach (var message in Messages)
+    {
+        <MessageComponent Message="@message" OnDelete="@OnDeleteMessage" />
+    }
+</RadzenStack>
+
+@code {
+    [Parameter] public List<ChatMessageDto> Messages { get; set; } = new();
+    [Parameter] public EventCallback<Guid> OnDeleteMessage { get; set; }
+}

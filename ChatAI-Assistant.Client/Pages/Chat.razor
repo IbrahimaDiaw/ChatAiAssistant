@@ -1,0 +1,25 @@
+﻿@page "/chat"
+@using ChatAI_Assistant.Client.Components
+@using Radzen
+@using Radzen.Blazor
+
+<PageTitle>Chat - ChatAI Assistant</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <!-- Page Header -->
+    <RadzenCard Class="rz-shadow-1">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" 
+                   JustifyContent="JustifyContent.SpaceBetween" Class="rz-p-3">
+            <RadzenText TextStyle="TextStyle.H5" Class="rz-mb-0">Chat Interface</RadzenText>
+            <RadzenBreadCrumb>
+                <RadzenBreadCrumbItem Path="/" Text="Home" />
+                <RadzenBreadCrumbItem Text="Chat" />
+            </RadzenBreadCrumb>
+        </RadzenStack>
+    </RadzenCard>
+
+    <!-- Chat Component (Full Height) -->
+    <div style="height: calc(100vh - 200px);">
+        <ChatComponent />
+    </div>
+</RadzenStack>
